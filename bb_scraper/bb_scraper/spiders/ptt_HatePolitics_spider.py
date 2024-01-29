@@ -5,13 +5,13 @@ import re
 import requests
 from bb_scraper.items import PostItem
 
-class PTTGossipSpider(scrapy.Spider):
+class PTTHatePoliticsSpider(scrapy.Spider):
     name = "ptt_hate_politics"
     board = "HatePolitics"
 
     def start_requests(self):
-        last_page = PTTGossipSpider.getLastPage()
-        url = 'https://www.ptt.cc/bbs/%s/index%s.html' % (PTTGossipSpider.board, last_page)
+        last_page = PTTHatePoliticsSpider.getLastPage()
+        url = 'https://www.ptt.cc/bbs/%s/index%s.html' % (PTTHatePoliticsSpider.board, last_page)
         yield scrapy.Request(url=url, callback=self.parse_page, cookies={'over18': '1'}, method='get')
       
     def parse_page(self, response):
@@ -70,10 +70,10 @@ class PTTGossipSpider(scrapy.Spider):
     @staticmethod
     def getLastPage():
         content = requests.get(
-            url= 'https://www.ptt.cc/bbs/%s/index.html' % PTTGossipSpider.board,
+            url= 'https://www.ptt.cc/bbs/%s/index.html' % PTTHatePoliticsSpider.board,
             cookies={'over18': '1'}, timeout=3
         ).content.decode('utf-8')
-        first_page = re.search(r'href="/bbs/%s/index(\d+).html">&lsaquo;' % PTTGossipSpider.board, content)
+        first_page = re.search(r'href="/bbs/%s/index(\d+).html">&lsaquo;' % PTTHatePoliticsSpider.board, content)
         if first_page is None:
             return 1
         return int(first_page.group(1)) + 1

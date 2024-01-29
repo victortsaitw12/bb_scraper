@@ -6,7 +6,10 @@ from scrapy.utils.project import get_project_settings
 def load_spiders():
     from bb_scraper.spiders import ptt_gossip_spider
     from bb_scraper.spiders import ptt_HatePolitics_spider
-    return spiders
+    return [
+        ptt_gossip_spider.PTTGossipSpider,
+        ptt_HatePolitics_spider.PTTHatePoliticsSpider
+    ]
 
 
 def crawl_job():
@@ -18,7 +21,9 @@ def crawl_job():
 
 
 def crawl():
-        
-
-if __nme__ == '__main__':
+    d = crawl_job()
+    d.addBoth(lambda _: reactor.stop())
     reactor.run()
+
+if __name__ == '__main__':
+    crawl()
