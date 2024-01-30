@@ -50,6 +50,8 @@ DOWNLOAD_DELAY = 1.25
 #    'bb_scraper.middlewares.BbScraperSpiderMiddleware': 543,
 #}
 
+SELENIUM_DRIVER_ARGUMENTS = ["--headless=new"] 
+
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
@@ -65,6 +67,7 @@ DOWNLOAD_DELAY = 1.25
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+    'scrapy_selenium.SeleniumMiddleware': 100,
     'bb_scraper.pipelines.BbScraperPipeline': 300,
 }
 
