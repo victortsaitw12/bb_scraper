@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from shutil import which
 
 # Scrapy settings for bb_scraper project
 #
@@ -50,7 +51,11 @@ DOWNLOAD_DELAY = 1.25
 #    'bb_scraper.middlewares.BbScraperSpiderMiddleware': 543,
 #}
 
-SELENIUM_DRIVER_ARGUMENTS = ["--headless=new"] 
+SELENIUM_DRIVER_NAME = 'chrome'
+SELENIUM_DRIVER_EXECUTABLE_PATH = "C:\Windows\chromedriver.exe"
+SELENIUM_DRIVER_ARGUMENTS=['--headless'] # '--headless' if using chrome instead of firefox
+
+# SELENIUM_DRIVER_ARGUMENTS = ["--headless=new"] 
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
@@ -68,7 +73,7 @@ SELENIUM_DRIVER_ARGUMENTS = ["--headless=new"]
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'scrapy_selenium.SeleniumMiddleware': 100,
-    'bb_scraper.pipelines.BbScraperPipeline': 300,
+    # 'bb_scraper.pipelines.BbScraperPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
