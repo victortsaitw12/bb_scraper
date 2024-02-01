@@ -29,7 +29,7 @@ for x in range(0, 10):
     driver.execute_script("$(arguments[0]).click()", load_more)
     time.sleep(10)
 
-driver.quit()
+# driver.quit()
 
 
 

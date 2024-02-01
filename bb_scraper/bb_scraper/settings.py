@@ -52,16 +52,17 @@ DOWNLOAD_DELAY = 1.25
 #}
 
 SELENIUM_DRIVER_NAME = 'chrome'
-SELENIUM_DRIVER_EXECUTABLE_PATH = "C:\Windows\chromedriver.exe"
-SELENIUM_DRIVER_ARGUMENTS=['--headless'] # '--headless' if using chrome instead of firefox
+# SELENIUM_DRIVER_EXECUTABLE_PATH = "C:\Windows\chromedriver.exe"
+SELENIUM_DRIVER_ARGUMENTS=[] # '--headless' if using chrome instead of firefox
 
 # SELENIUM_DRIVER_ARGUMENTS = ["--headless=new"] 
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy_selenium.SeleniumMiddleware': 800
 #    'bb_scraper.middlewares.BbScraperDownloaderMiddleware': 543,
-#}
+}
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
@@ -72,7 +73,6 @@ SELENIUM_DRIVER_ARGUMENTS=['--headless'] # '--headless' if using chrome instead 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'scrapy_selenium.SeleniumMiddleware': 100,
     # 'bb_scraper.pipelines.BbScraperPipeline': 300,
 }
 
