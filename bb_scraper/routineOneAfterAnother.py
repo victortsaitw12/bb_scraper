@@ -11,17 +11,15 @@ def load_spiders():
         ptt_HatePolitics_spider.PTTHatePoliticsSpider
     ]
 
+configure_logging()
+settings = get_project_settings()
+runner = CrawlerRunner(settings)
 
+@defer.inlineCallbacks
 def crawl():
-    configure_logging()
-    settings = get_project_settings()
-    runner = CrawlerRunner(settings)
     for spider in load_spiders():
-        runner.crawl(spider)
-    d = runner.join()
-    d.addBoth(lambda _: reactor.stop())
-    reactor.run()
+        yield runner.crawl(spider)
+    reactor.stop()
+crawl()
+reactor.run()
 
-
-if __name__ == '__main__':
-   crawl()

@@ -57,6 +57,7 @@ SELENIUM_DRIVER_ARGUMENTS=[] # '--headless' if using chrome instead of firefox
 
 # SELENIUM_DRIVER_ARGUMENTS = ["--headless=new"] 
 
+
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
@@ -74,6 +75,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     # 'bb_scraper.pipelines.BbScraperPipeline': 300,
+      "bb_scraper.pipelines.MongoDBPipeline": 500
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

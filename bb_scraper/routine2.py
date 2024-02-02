@@ -13,15 +13,11 @@ def load_spiders():
 
 
 def crawl():
-    configure_logging()
     settings = get_project_settings()
-    runner = CrawlerRunner(settings)
+    process = CrawlerProcess(settings)
     for spider in load_spiders():
-        runner.crawl(spider)
-    d = runner.join()
-    d.addBoth(lambda _: reactor.stop())
-    reactor.run()
-
+        process.crawl(spider)
+    process.start()
 
 if __name__ == '__main__':
    crawl()

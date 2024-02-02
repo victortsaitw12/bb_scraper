@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
+
 import scrapy
 from scrapy_selenium import SeleniumRequest
 import time
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+from bb_scraper.items import PostItem
 
 class BusinessweeklySpider(scrapy.Spider):
     name = "businessweekly"
@@ -27,7 +30,7 @@ class BusinessweeklySpider(scrapy.Spider):
             url = content.find_element(By.CSS_SELECTOR, "a").get_attribute("href")
             follow_links.append(url)
         
-        print('urls: ', len(follow_links))
+        print('businessweekly all urls ', len(follow_links))
 
         for url in follow_links:
             time.sleep(10)
@@ -35,8 +38,15 @@ class BusinessweeklySpider(scrapy.Spider):
 
     def parse_detail(self, response):
         driver = response.request.meta["driver"]
+        date = driver.find_element(By.XPATH, '//meta[@property="article:modified_time"]').get_attribute('content')
+        author = driver.find_element(By.CSS_SELECTOR, ".Single-author-row-name")
         title = driver.find_element(By.CSS_SELECTOR, ".Single-title-main")
-        print(title.text)
-        yield {
-            title: title.text
-        }
+        content = driver.find_element(By.CSS_SELECTOR, ".Single-article")
+
+        yield PostItem(
+            name=self.name,
+            title=title.text,
+            content=content.text,
+            date=date,
+            author=author.text,
+            url=response.request.url)
