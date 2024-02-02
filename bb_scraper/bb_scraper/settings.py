@@ -56,7 +56,8 @@ SELENIUM_DRIVER_NAME = 'chrome'
 SELENIUM_DRIVER_ARGUMENTS=[] # '--headless' if using chrome instead of firefox
 
 # SELENIUM_DRIVER_ARGUMENTS = ["--headless=new"] 
-
+MONGODB_URI = ''
+MONGODB_DATABASE = ''
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
