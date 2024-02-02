@@ -6,9 +6,14 @@ from scrapy.utils.log import configure_logging
 def load_spiders():
     from bb_scraper.spiders import ptt_gossip_spider
     from bb_scraper.spiders import ptt_HatePolitics_spider
+    from bb_scraper.spiders import bccnews
+    from bb_scraper.spiders import businessweekly
+
     return [
-        ptt_gossip_spider.PTTGossipSpider,
-        ptt_HatePolitics_spider.PTTHatePoliticsSpider
+        # ptt_gossip_spider.PTTGossipSpider,
+        # ptt_HatePolitics_spider.PTTHatePoliticsSpider,
+        businessweekly.BusinessweeklySpider,
+        bccnews.BbcNewsSpider
     ]
 
 configure_logging()
