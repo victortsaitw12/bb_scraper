@@ -49,4 +49,4 @@ class BusinessweeklySpider(scrapy.Spider):
             content=content.text,
             date=date,
             author=author.text,
-            url=response.request.url)
+            url=driver.current_url)
