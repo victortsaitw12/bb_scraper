@@ -15,7 +15,10 @@ class EbcSpider(scrapy.Spider):
     def start_requests(self):
         url = "https://news.tvbs.com.tw/realtime"
         yield SeleniumRequest(url=url, callback=self.parse, wait_time=10)
-            
+
+        # url = "https://news.tvbs.com.tw/entertainment/2387860"    
+        # yield SeleniumRequest(url=url, callback=self.parse_detail, wait_time=5)
+
     def parse(self, response):
         driver = response.request.meta["driver"]
         time.sleep(10)
@@ -49,10 +52,10 @@ class EbcSpider(scrapy.Spider):
     def parse_detail(self, response):
         driver = response.request.meta["driver"]
         title = driver.find_element(By.XPATH, '//meta[@app="tvbsapp"]').get_attribute('newstitle')
-        author_block = driver.find_element(By.CSS_SELECTOR, "article > div.author")
-        author = author_block.find_element(By.CSS_SELECTOR, "a").text
+        author_block = driver.find_element(By.CSS_SELECTOR, "div.author")
+        author = "".join([name.text for name in author_block.find_elements(By.CSS_SELECTOR, "a")])
         date = author_block.get_attribute("textContent")        
-        content = driver.find_element(By.CSS_SELECTOR, '.news_detail_div').text
+        content = driver.find_element(By.CSS_SELECTOR, '#news_detail_div').text
         yield PostItem(
             name=self.name,
             title=title,
