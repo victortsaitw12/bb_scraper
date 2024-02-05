@@ -14,8 +14,6 @@ class BbcNewsSpider(scrapy.Spider):
     def start_requests(self):
         url = "https://bccnews.com.tw/archives/category/%e5%8d%b3%e6%99%82"
         yield SeleniumRequest(url=url, callback=self.parse, wait_time=10)
-        # url = "https://bccnews.com.tw/archives/526065"
-        # yield SeleniumRequest(url=url, callback=self.parse_detail, wait_time=10)
 
     def parse(self, response):
         driver = response.request.meta["driver"]

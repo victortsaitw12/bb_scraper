@@ -15,9 +15,6 @@ class MirrormediaSpider(scrapy.Spider):
     def start_requests(self):
         url = "https://www.mirrormedia.mg/"
         yield SeleniumRequest(url=url, callback=self.parse, wait_time=10)
-            
-        # url = "https://www.mirrormedia.mg/external/setn_1422582"
-        # yield SeleniumRequest(url=url, callback=self.parse_detail, wait_time=10)
 
     def parse(self, response):
         driver = response.request.meta["driver"]

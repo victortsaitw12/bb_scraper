@@ -14,9 +14,7 @@ class NownewsSpider(scrapy.Spider):
     def start_requests(self):
         url = "https://www.nownews.com/cat/breaking/"
         yield SeleniumRequest(url=url, callback=self.parse, wait_time=5)
-            
-        # url = "https://www.nownews.com/news/635844"
-        # yield SeleniumRequest(url=url, callback=self.parse_detail, wait_time=5)
+
 
     def parse(self, response):
         driver = response.request.meta["driver"]
