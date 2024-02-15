@@ -18,7 +18,7 @@
 2. 進去修改
 例如路徑為
 C:\Users\{account}\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12\LocalCache\local-packages\Python312\site-packages\scrapy_selenium\middlewares.py
-
+更改如下:
 
     """This module contains the ``SeleniumMiddleware`` scrapy middleware"""
 
