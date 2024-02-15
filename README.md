@@ -1,3 +1,5 @@
+# 執行方式
+
 ### 建立虛擬環境
 
 ```python3 -m venv myenv```
@@ -21,7 +23,9 @@
 2. 進去修改
 例如路徑為
 C:\Users\{account}\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12\LocalCache\local-packages\Python312\site-packages\scrapy_selenium\middlewares.py
+
 更改如下:
+
 
     """This module contains the ``SeleniumMiddleware`` scrapy middleware"""
 
@@ -181,3 +185,22 @@ C:\Users\{account}\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12\L
 
 ### 離開虛擬環境
 ```deactivate```
+
+
+# 網站對應一覽表
+| 網站名稱  | 程式檔名  |
+| -------- | --------- |
+| 中廣 | bccnews.py |
+| 商周 | businessweekly.py |
+| 東森新聞 | ebc.py |
+| 自由時報 | ltn.py |
+| 鏡周刊 | mirrormedia.py |
+| 今日新聞 | nownews.py |
+| PTT八卦版 | ptt_gossip_spider.py |
+| PTT黑特版 | ptt_HatPolitics_spider.py |
+| 菱傳媒 | rwnews.py |
+| 風傳媒 | storm.py |
+| TVBS | tvbs.py |
+
+
+
