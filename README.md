@@ -8,6 +8,9 @@
 * on macOS and Linux
 ```source myenv/bin/activate```
 
+### 進入 bb_scraper 資料夾
+```cd bb_scraper```
+
 ### 安裝爬蟲所需要的套件
 ```pip install -r requirements.txt```
 
