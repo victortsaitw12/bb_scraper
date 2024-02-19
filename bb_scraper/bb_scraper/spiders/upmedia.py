@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import requests
 import json
 import re
+from bb_scraper.items import PostItem
 
 class UpmediaSpider(scrapy.Spider):
 #class UpmediaSpider(scrapy.Spider):
@@ -20,7 +21,7 @@ class UpmediaSpider(scrapy.Spider):
             "days_limit": 3600 * 24,
             "interval": 3600,
             #"url": "https://www.upmedia.mg/news_list.php?Type=2",
-            "url": "https://www.upmedia.mg/news_list.php?Type=130",
+            "url": "https://www.upmedia.mg/news_list.php?Type=latest",
             "scrapy_key": "upmedia:start_urls",
             "priority": 1
         }]
@@ -106,7 +107,14 @@ class UpmediaSpider(scrapy.Spider):
         if 'location.href' in location.text:
             new_location = re.search(r'location.href=\'(.*?)\';',location.text.strip()).group(1)
             return scrapy.Request(new_location, callback=self.parse_article)
-            
+        yield PostItem(
+            name=self.name,
+            title=self.parse_title(soup),
+            content=self.parse_content(soup),
+            date=self.parse_datetime(soup),
+            author=self.parse_author(soup),
+            url=response.url)
+        
     #     item = NewsItem()
     #     item['url'] = response.url
     #     item['author'] = self.parse_author(soup)
@@ -121,48 +129,48 @@ class UpmediaSpider(scrapy.Spider):
     #     item['proto'] =  'UPMEDIA_PARSE_ITEM'
     #     return item
 
-    # def parse_title(self, soup):
-    #     title = soup.find('title').text
-    #     title = ' '.join(title.split())
-    #     title = title.split('--')[0]
-    #     return title
+    def parse_title(self, soup):
+        title = soup.find('title').text
+        title = ' '.join(title.split())
+        title = title.split('--')[0]
+        return title
     
-    # def parse_datetime(self, soup):     
-    #     date = soup.find('head').find('meta',{'name':"pubdate"})['content']
-    #     date = datetime.strptime( date , '%Y-%m-%dT%H:%M:%S')
-    #     date = date.strftime('%Y-%m-%dT%H:%M:%S+0800')
-    #     return date
+    def parse_datetime(self, soup):     
+        date = soup.find('head').find('meta',{'name':"pubdate"})['content']
+        date = datetime.strptime( date , '%Y-%m-%dT%H:%M:%S')
+        date = date.strftime('%Y-%m-%dT%H:%M:%S+0800')
+        return date
     
-    # def parse_author(self, soup):
-    #     try:
-    #         author = soup.find('div','author').find_all('a')
-    #         author = ','.join(x.text for x in author)
-    #         if author.find('／') != -1:
-    #             author = re.split('／', author)[1]
-    #     except:
-    #         author = ''
-    #     return author
+    def parse_author(self, soup):
+        try:
+            author = soup.find('div','author').find_all('a')
+            author = ','.join(x.text for x in author)
+            if author.find('／') != -1:
+                author = re.split('／', author)[1]
+        except:
+            author = ''
+        return author
     
-    # def parse_content(self, soup):
-    #     content = soup.find('div','editor')
-    #     for rss_close in content.find_all('div','rss_close'):
-    #         rss_close.decompose()
-    #     for ad in content.find_all('a'):
-    #         ad.decompose()
-    #     for ad in content.find_all('div',{'id':'divider_ad'}):
-    #         ad.decompose()
-    #     for script in content.find_all('script'):
-    #         script.decompose() 
-    #     content = '\n'.join(content.text.split())
-    #     content = content.replace('（）','')
-    #     return content
+    def parse_content(self, soup):
+        content = soup.find('div','editor')
+        for rss_close in content.find_all('div','rss_close'):
+            rss_close.decompose()
+        for ad in content.find_all('a'):
+            ad.decompose()
+        for ad in content.find_all('div',{'id':'divider_ad'}):
+            ad.decompose()
+        for script in content.find_all('script'):
+            script.decompose() 
+        content = '\n'.join(content.text.split())
+        content = content.replace('（）','')
+        return content
     
-    # def parse_metadata(self, soup):
-    #     keywords = soup.find('head').find('meta',{'name':'keywords'})['content']
-    #     keywords = re.split(',', keywords)
-    #     category = soup.find('meta',{'itemprop':'articleSection'})['content']
-    #     return {
-    #         'tag':keywords,
-    #         'category':category,
-    #         'fb_like_count':''
-    #     }
+    def parse_metadata(self, soup):
+        keywords = soup.find('head').find('meta',{'name':'keywords'})['content']
+        keywords = re.split(',', keywords)
+        category = soup.find('meta',{'itemprop':'articleSection'})['content']
+        return {
+            'tag':keywords,
+            'category':category,
+            'fb_like_count':''
+        }

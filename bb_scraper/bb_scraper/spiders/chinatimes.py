@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 import json
 import re
+from bb_scraper.items import PostItem
 
 class ChinatimesSpider(scrapy.Spider):
     name = "chinatimes"
@@ -18,7 +19,7 @@ class ChinatimesSpider(scrapy.Spider):
             "enabled": True,
             "days_limit": 3600 * 24 * 3,
             "interval": 3600 * 2,
-            "url": "https://www.chinatimes.com/politic/total/?page=1&chdtv",
+            "url": "https://www.chinatimes.com/realtimenews/?page=1&chdtv",
             "scrapy_key": "chinatimes:start_urls",
             "priority": 1
         }]
@@ -72,31 +73,38 @@ class ChinatimesSpider(scrapy.Spider):
     #     item['media'] = 'chinatimes'
     #     item['proto'] = 'CHINATIMES_PARSE_ITEM'
     #     return item
+        yield PostItem(
+            name=self.name,
+            title=self.parse_title(soup),
+            content=self.parse_content(soup),
+            date=self.parse_datetime(soup),
+            author=self.parse_author(soup),
+            url=response.url)
+        
+    def parse_datetime(self, soup):
+        date = soup.find('div','meta-info').find('time')['datetime']
+        date = datetime.strptime( date , '%Y-%m-%d %H:%M')
+        date = date.strftime('%Y-%m-%dT%H:%M:%S+0800')
+        return date
+    
+    def parse_author(self, soup):
+        author = re.findall('\S',soup.find('div','author').text)
+        author = ''.join([x for x in author ]) 
+        return author
+    
+    def parse_title(self, soup):
+        title = soup.find('h1','article-title').text
+        title = ' '.join(title.split())
+        return title
+    
+    def parse_content(self, soup):
+        content = soup.find('head').find('meta',{'name':'description'})['content']
+        return content
 
-    # def parse_datetime(self, soup):
-    #     date = soup.find('div','meta-info').find('time')['datetime']
-    #     date = datetime.strptime( date , '%Y-%m-%d %H:%M')
-    #     date = date.strftime('%Y-%m-%dT%H:%M:%S+0800')
-    #     return date
-    
-    # def parse_author(self, soup):
-    #     author = re.findall('\S',soup.find('div','author').text)
-    #     author = ''.join([x for x in author ]) 
-    #     return author
-    
-    # def parse_title(self, soup):
-    #     title = soup.find('h1','article-title').text
-    #     title = ' '.join(title.split())
-    #     return title
-    
-    # def parse_content(self, soup):
-    #     content = soup.find('head').find('meta',{'name':'description'})['content']
-    #     return content
-
-    # def parse_metadata(self, soup):
-    #     keywords = soup.find('div','article-hash-tag').find_all('span','hash-tag')
-    #     keywords = [x.text.replace('#','') for x in keywords]
-    #     category = soup.find('meta',{'property':'article:section'})['content']
-    #     metadata = {'tag': keywords, 'category':category}
-    #     return metadata
+    def parse_metadata(self, soup):
+        keywords = soup.find('div','article-hash-tag').find_all('span','hash-tag')
+        keywords = [x.text.replace('#','') for x in keywords]
+        category = soup.find('meta',{'property':'article:section'})['content']
+        metadata = {'tag': keywords, 'category':category}
+        return metadata
     

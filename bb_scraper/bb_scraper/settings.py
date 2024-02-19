@@ -40,10 +40,10 @@ DOWNLOAD_DELAY = 1.25
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-#}
+DEFAULT_REQUEST_HEADERS = {
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+  'Accept-Language': 'en',
+}
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
@@ -52,12 +52,12 @@ DOWNLOAD_DELAY = 1.25
 #}
 
 SELENIUM_DRIVER_NAME = 'chrome'
-# SELENIUM_DRIVER_EXECUTABLE_PATH = "C:\Windows\chromedriver.exe"
+# SELENIUM_DRIVER_EXECUTABLE_PATH = "C:\chromedriver-win64\chromedriver.exe"
 SELENIUM_DRIVER_ARGUMENTS=[] # '--headless' if using chrome instead of firefox
 
 # SELENIUM_DRIVER_ARGUMENTS = ["--headless=new"] 
 MONGODB_URI = ''
-MONGODB_DATABASE = ''
+MONGODB_DATABASE = 'pbo'
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
