@@ -2,19 +2,16 @@
 import scrapy
 import traceback, sys
 from dateutil.parser import parse as date_parser
-from scraper.items import NewsItem
-from .redis_spiders import RedisSpider
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 import json
 import re
 
-class EttodaySpider(RedisSpider):
+class EttodaySpider(scrapy.Spider):
     name = "ettoday"
 
     def start_requests(self):
-        if isinstance(self, RedisSpider):
-            return
+
         requests = [{
             "media": "ettoday",
             "name": "ettoday",
@@ -104,61 +101,61 @@ class EttodaySpider(RedisSpider):
 
     def parse_article(self, response):
         soup = BeautifulSoup(response.body, 'html.parser')
-        item = NewsItem()
-        item['url'] = response.url
-        item['author'] = self.parse_author(soup)
-        item['article_title'] = self.parse_title(soup)
-        item['author_url'] = []
-        item['content'] = self.parse_content(soup)
-        item['comment'] = []
-        item['date'] = self.parse_datetime(soup)
-        item['metadata'] = self.parse_metadata(soup)
-        item['content_type'] = 0
-        item['media'] = 'ettoday'
-        item['proto'] = 'ETTODAY_PARSE_ITEM'
-        return item
+    #     item = NewsItem()
+    #     item['url'] = response.url
+    #     item['author'] = self.parse_author(soup)
+    #     item['article_title'] = self.parse_title(soup)
+    #     item['author_url'] = []
+    #     item['content'] = self.parse_content(soup)
+    #     item['comment'] = []
+    #     item['date'] = self.parse_datetime(soup)
+    #     item['metadata'] = self.parse_metadata(soup)
+    #     item['content_type'] = 0
+    #     item['media'] = 'ettoday'
+    #     item['proto'] = 'ETTODAY_PARSE_ITEM'
+    #     return item
 
-    def parse_datetime(self,soup):
-        try:
-            datetime = soup.find_all('time', {'class': 'date'})[0]['datetime']
-        except:
-            datetime = soup.find_all('time', {'class': 'news-time'})[0]['datetime']
-        datetime = datetime[:22]+datetime[-2:] #remove ':'
-        return datetime
+    # def parse_datetime(self,soup):
+    #     try:
+    #         datetime = soup.find_all('time', {'class': 'date'})[0]['datetime']
+    #     except:
+    #         datetime = soup.find_all('time', {'class': 'news-time'})[0]['datetime']
+    #     datetime = datetime[:22]+datetime[-2:] #remove ':'
+    #     return datetime
     
-    def parse_title(self,soup):
-        title = soup.select('h1')[0].text
-        title = ' '.join(title.split())
-        return title
+    # def parse_title(self,soup):
+    #     title = soup.select('h1')[0].text
+    #     title = ' '.join(title.split())
+    #     return title
     
-    def parse_author(self,soup): 
-        try:
-            # try Columnist
-            block = soup.find_all('div', {'class': 'penname_news clearfix'})
-            for ele in block:
-                penname = ele.find_all('a', {'class': 'pic'})
-            author = penname[0]['href'].split('/')[-1]
-            return author
+    # def parse_author(self,soup): 
+    #     try:
+    #         # try Columnist
+    #         block = soup.find_all('div', {'class': 'penname_news clearfix'})
+    #         for ele in block:
+    #             penname = ele.find_all('a', {'class': 'pic'})
+    #         author = penname[0]['href'].split('/')[-1]
+    #         return author
         
-        except:
-            script = re.search('"creator": ."[0-9]+....', str(soup.select('script')[0]))
-            author = re.findall(re.compile(u"[\u4e00-\u9fa5]+"), str(script))
-            return author[0] if len(author) else ''
+    #     except:
+    #         script = re.search('"creator": ."[0-9]+....', str(soup.select('script')[0]))
+    #         author = re.findall(re.compile(u"[\u4e00-\u9fa5]+"), str(script))
+    #         return author[0] if len(author) else ''
         
-    def parse_content(self,soup):
-        article = soup.find('div', class_='story')
-        paragraph = []
-        for p in article.find_all('p'):
-            text = p.text.strip()
-            if len(text) == 0 or text[0]=='►':
-                continue
-            paragraph.append(text)
+    # def parse_content(self,soup):
+    #     article = soup.find('div', class_='story')
+    #     paragraph = []
+    #     for p in article.find_all('p'):
+    #         text = p.text.strip()
+    #         if len(text) == 0 or text[0]=='►':
+    #             continue
+    #         paragraph.append(text)
             
-        content = '\n'.join(paragraph)
-        content = content.split('【更多鏡週刊相關報導】')[0]
-        return content
+    #     content = '\n'.join(paragraph)
+    #     content = content.split('【更多鏡週刊相關報導】')[0]
+    #     return content
     
-    def parse_metadata(self,soup):
-        metadata = {'category':'', 'fb_like_count': ''}
-        metadata['category'] = soup.find('meta',{'property':'article:section'})['content']
-        return metadata
+    # def parse_metadata(self,soup):
+    #     metadata = {'category':'', 'fb_like_count': ''}
+    #     metadata['category'] = soup.find('meta',{'property':'article:section'})['content']
+    #     return metadata

@@ -4,17 +4,12 @@ import scrapy
 from itertools import chain
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
-from scraper.items import NewsItem
 import re
-from .redis_spiders import RedisSpider
 
-class AppledailySpider(RedisSpider):
+class AppledailySpider(scrapy.Spider):
     name = 'appledaily'
 
     def start_requests(self):
-
-        if isinstance(self, RedisSpider):
-            return
 
         request = {
             "url": 'https://tw.appledaily.com/new/realtime/1',
@@ -123,83 +118,83 @@ class AppledailySpider(RedisSpider):
 
         detail_html = response.meta['soup']
 
-        item = NewsItem()
-        item['url'] = response.url
-        title = detail_html.find('article','ndArticle_leftColumn').find('h1').text
-        title = ' '.join(title.split())
-        item['article_title'] = title
-        item['metadata'] = {
-            'keywords': parse_keywords(detail_html),
-            'category': detail_html.find('div','ndgNav_floatList twlist').find('a','current').text
-        }
-        item['date'] = parse_date(detail_html)    
-        item['content'] = parse_content(detail_html)  
-        item['author'] = parse_author(detail_html.text)
-        item['author_url'] = []
-        item['comment'] = []
-        item['media'] = 'appledaily'
-        item['content_type'] = 0
-        item['proto'] = 'PTT_PARSE_ITEM'
-        return item
+    #     item = NewsItem()
+    #     item['url'] = response.url
+    #     title = detail_html.find('article','ndArticle_leftColumn').find('h1').text
+    #     title = ' '.join(title.split())
+    #     item['article_title'] = title
+    #     item['metadata'] = {
+    #         'keywords': parse_keywords(detail_html),
+    #         'category': detail_html.find('div','ndgNav_floatList twlist').find('a','current').text
+    #     }
+    #     item['date'] = parse_date(detail_html)    
+    #     item['content'] = parse_content(detail_html)  
+    #     item['author'] = parse_author(detail_html.text)
+    #     item['author_url'] = []
+    #     item['comment'] = []
+    #     item['media'] = 'appledaily'
+    #     item['content_type'] = 0
+    #     item['proto'] = 'PTT_PARSE_ITEM'
+    #     return item
 
             
-    def parse_free_detail(self, response):
+    # def parse_free_detail(self, response):
     
-        def parse_content(soup):
-            raw_json = soup.find_all('script',{'type':'application/javascript'})
-            raw_json = [ r for r in raw_json if 'raw_html' in str(r)]
-            raw_json = str(raw_json[0])
+    #     def parse_content(soup):
+    #         raw_json = soup.find_all('script',{'type':'application/javascript'})
+    #         raw_json = [ r for r in raw_json if 'raw_html' in str(r)]
+    #         raw_json = str(raw_json[0])
                 
-            content = re.search(r'content":"(.*?)"}', raw_json).group(1)  
-            content = BeautifulSoup(content, 'html.parser')
-            content = ''.join(content.text.split())
+    #         content = re.search(r'content":"(.*?)"}', raw_json).group(1)  
+    #         content = BeautifulSoup(content, 'html.parser')
+    #         content = ''.join(content.text.split())
                 
-            return content
+    #         return content
             
-        def parse_author(content):
-            content = content.replace('(','（')
-            content = content.replace(')','）')
+    #     def parse_author(content):
+    #         content = content.replace('(','（')
+    #         content = content.replace(')','）')
                 
-            end_indx = []
-            for m in re.finditer('報導）', content):
-                end_indx.append(m.start())            
+    #         end_indx = []
+    #         for m in re.finditer('報導）', content):
+    #             end_indx.append(m.start())            
                 
-            start_indx = []
-            for m in re.finditer('（', content):
-                start_indx.append(m.end())
+    #         start_indx = []
+    #         for m in re.finditer('（', content):
+    #             start_indx.append(m.end())
                 
-            if len(end_indx)!=1 or len(start_indx)==0:
-                author = ''
-            else:
-                find_close = end_indx[0] - np.array(start_indx)
-                start_indx = start_indx[ np.where( find_close == min(find_close[find_close>0]) )[0][0] ]
-                author = re.split('／',content[start_indx:end_indx[0]])[0]
-            return author
+    #         if len(end_indx)!=1 or len(start_indx)==0:
+    #             author = ''
+    #         else:
+    #             find_close = end_indx[0] - np.array(start_indx)
+    #             start_indx = start_indx[ np.where( find_close == min(find_close[find_close>0]) )[0][0] ]
+    #             author = re.split('／',content[start_indx:end_indx[0]])[0]
+    #         return author
             
-        def parse_date(soup):
-            raw_json = soup.find_all('script',{'type':'application/javascript'})
-            raw_json = [ r for r in raw_json if 'raw_html' in str(r)]
-            raw_json = str(raw_json[0])
-            date = re.search(r'created_date":"(.*?)",', raw_json).group(1)  
-            date = datetime.strptime(date.split('.')[0].split('Z')[0] , '%Y-%m-%dT%H:%M:%S')
-            date = date + timedelta(hours=8)
-            return date.strftime('%Y-%m-%dT%H:%M:%S+0800')
+    #     def parse_date(soup):
+    #         raw_json = soup.find_all('script',{'type':'application/javascript'})
+    #         raw_json = [ r for r in raw_json if 'raw_html' in str(r)]
+    #         raw_json = str(raw_json[0])
+    #         date = re.search(r'created_date":"(.*?)",', raw_json).group(1)  
+    #         date = datetime.strptime(date.split('.')[0].split('Z')[0] , '%Y-%m-%dT%H:%M:%S')
+    #         date = date + timedelta(hours=8)
+    #         return date.strftime('%Y-%m-%dT%H:%M:%S+0800')
                 
-        detail_html = response.meta['soup']
+    #     detail_html = response.meta['soup']
 
-        item = NewsItem()
-        item['url'] = response.url
-        item['article_title'] = ' '.join(detail_html.find('meta',{'property':'twitter:title'})['content'].split())
-        item['metadata'] = {
-            'keywords': detail_html.find('meta',{'name':'keywords'})['content'].split(','),
-            'category': detail_html.find('div', {'class': re.compile(r'section-name-container section-name-container-underscore')}).find('a').text
-        }
-        item['date'] = parse_date(detail_html)    
-        item['content'] = parse_content(detail_html)  
-        item['author'] = parse_author(detail_html.text)
-        item['author_url'] = []
-        item['comment'] = []
-        item['media'] = 'appledaily'
-        item['content_type'] = 0
-        item['proto'] = 'PTT_PARSE_ITEM'
-        return item
+    #     item = NewsItem()
+    #     item['url'] = response.url
+    #     item['article_title'] = ' '.join(detail_html.find('meta',{'property':'twitter:title'})['content'].split())
+    #     item['metadata'] = {
+    #         'keywords': detail_html.find('meta',{'name':'keywords'})['content'].split(','),
+    #         'category': detail_html.find('div', {'class': re.compile(r'section-name-container section-name-container-underscore')}).find('a').text
+    #     }
+    #     item['date'] = parse_date(detail_html)    
+    #     item['content'] = parse_content(detail_html)  
+    #     item['author'] = parse_author(detail_html.text)
+    #     item['author_url'] = []
+    #     item['comment'] = []
+    #     item['media'] = 'appledaily'
+    #     item['content_type'] = 0
+    #     item['proto'] = 'PTT_PARSE_ITEM'
+    #     return item

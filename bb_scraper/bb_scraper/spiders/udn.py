@@ -2,20 +2,18 @@
 import scrapy
 import traceback, sys
 from dateutil.parser import parse as date_parser
-from scraper.items import NewsItem
-from .redis_spiders import RedisSpider
+
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 import requests
 import json
 import re
 
-class UDNSpider(RedisSpider):
+class UDNSpider(scrapy.Spider):
     name = "udn"
 
     def start_requests(self):
-        if isinstance(self, RedisSpider):
-            return
+
         requests = [{
             "media": "udn",
             "name": "udn",
@@ -79,119 +77,119 @@ class UDNSpider(RedisSpider):
     
     def parse_article(self, response):
         soup = BeautifulSoup(response.body, 'html.parser')
-        item = NewsItem()
-        item['url'] = response.url
-        item['date'] = self.parse_datetime(soup)
-        item['content'] = self.parse_content(soup)
-        item['author'] = self.parse_author(soup)
-        item['article_title'] = self.parse_title(soup)
-        item['author_url'] = []
-        item['comment'] = []
-        item['metadata'] = self.parse_metadata(soup)
-        item['content_type'] = 0
-        item['media'] = 'udn'
-        item['proto'] = 'UDN_PARSE_ITEM'
-        yield item
+    #     item = NewsItem()
+    #     item['url'] = response.url
+    #     item['date'] = self.parse_datetime(soup)
+    #     item['content'] = self.parse_content(soup)
+    #     item['author'] = self.parse_author(soup)
+    #     item['article_title'] = self.parse_title(soup)
+    #     item['author_url'] = []
+    #     item['comment'] = []
+    #     item['metadata'] = self.parse_metadata(soup)
+    #     item['content_type'] = 0
+    #     item['media'] = 'udn'
+    #     item['proto'] = 'UDN_PARSE_ITEM'
+    #     yield item
 
-        # crawl and parse comment
-        url = "https://func.udn.com/funcap/discuss/disList.jsp"
-        headers = {
-            'cache-control': "no-cache",
-            'Postman-Token': "0b516666-c0f2-4bd3-be57-e74257f024fa"
-        }
-        fp = 1
+    #     # crawl and parse comment
+    #     url = "https://func.udn.com/funcap/discuss/disList.jsp"
+    #     headers = {
+    #         'cache-control': "no-cache",
+    #         'Postman-Token': "0b516666-c0f2-4bd3-be57-e74257f024fa"
+    #     }
+    #     fp = 1
 
-        while True:
-            querystring = {
-                "article_id": response.url.split('/')[-1],
-                "channel_id": "2",
-                "fp": str(fp)
-            }
-            discuss_section = requests.request("GET", url, data="", headers=headers, params=querystring)
-            fp+=1
+    #     while True:
+    #         querystring = {
+    #             "article_id": response.url.split('/')[-1],
+    #             "channel_id": "2",
+    #             "fp": str(fp)
+    #         }
+    #         discuss_section = requests.request("GET", url, data="", headers=headers, params=querystring)
+    #         fp+=1
             
-            if re.search(r'var dislist\= \[ (.*?)] ;', discuss_section.text) == None: #the end of comments
-                break
+    #         if re.search(r'var dislist\= \[ (.*?)] ;', discuss_section.text) == None: #the end of comments
+    #             break
 
-            dislist = re.search(r'var dislist\= \[ (.*?)] ;', discuss_section.text).group(1)
-            dislist = dislist.split('} , {')
-            for i in range(len(dislist)):
+    #         dislist = re.search(r'var dislist\= \[ (.*?)] ;', discuss_section.text).group(1)
+    #         dislist = dislist.split('} , {')
+    #         for i in range(len(dislist)):
 
-                if len(dislist) == 1:
-                    raw = json.loads(dislist[i])
+    #             if len(dislist) == 1:
+    #                 raw = json.loads(dislist[i])
 
-                elif i == 0:        
-                    raw = json.loads(dislist[i] + '}')
+    #             elif i == 0:        
+    #                 raw = json.loads(dislist[i] + '}')
 
-                elif i == len(dislist) - 1:
-                    raw = json.loads('{' + dislist[i])
+    #             elif i == len(dislist) - 1:
+    #                 raw = json.loads('{' + dislist[i])
 
-                else:
-                    raw = json.loads('{' + dislist[i] + '}')
+    #             else:
+    #                 raw = json.loads('{' + dislist[i] + '}')
 
-                comment_date = datetime.strptime(raw['postDate'], '%Y/%m/%d %H:%M:%S')
-                comment_date = comment_date.strftime('%Y-%m-%dT%H:%M:%S+0800')
-                item = NewsItem()
-                item['url'] = response.url
-                item['metadata'] = {}
-                item['article_title'] = self.parse_title(soup)
-                item['author'] = raw['nickname']
-                item['author_url'] = []
-                item['date'] = comment_date
-                item['content'] = ''.join(raw['content'].split())
-                item['content_type'] = 1
-                item['media'] = 'udn'
-                item['proto'] = 'UDN_PARSE_ITEM'
-                item['comment'] = []
-                yield item
+    #             comment_date = datetime.strptime(raw['postDate'], '%Y/%m/%d %H:%M:%S')
+    #             comment_date = comment_date.strftime('%Y-%m-%dT%H:%M:%S+0800')
+    #             item = NewsItem()
+    #             item['url'] = response.url
+    #             item['metadata'] = {}
+    #             item['article_title'] = self.parse_title(soup)
+    #             item['author'] = raw['nickname']
+    #             item['author_url'] = []
+    #             item['date'] = comment_date
+    #             item['content'] = ''.join(raw['content'].split())
+    #             item['content_type'] = 1
+    #             item['media'] = 'udn'
+    #             item['proto'] = 'UDN_PARSE_ITEM'
+    #             item['comment'] = []
+    #             yield item
 
 
-    def parse_datetime(self, soup):
-        date_org = soup.find('div', class_ = 'story_bady_info_author').find('span').text   
-        date = datetime.strptime(date_org, '%Y-%m-%d %H:%M').strftime('%Y-%m-%dT%H:%M:%S+0800')
-        return date
+    # def parse_datetime(self, soup):
+    #     date_org = soup.find('div', class_ = 'story_bady_info_author').find('span').text   
+    #     date = datetime.strptime(date_org, '%Y-%m-%d %H:%M').strftime('%Y-%m-%dT%H:%M:%S+0800')
+    #     return date
     
-    def parse_title(self, soup):
-        return soup.find('h1', class_ = 'story_art_title').text
+    # def parse_title(self, soup):
+    #     return soup.find('h1', class_ = 'story_art_title').text
             
-    def parse_content(self, soup):
-        content = ''.join([ent.text for ent in soup.find_all('p')]).replace('\n', '').replace('      500字以內，目前輸入 0 字      ', '')
-        if '【相關閱讀】' in content:
-            content = content.split('【相關閱讀】')[0]
-        return content
+    # def parse_content(self, soup):
+    #     content = ''.join([ent.text for ent in soup.find_all('p')]).replace('\n', '').replace('      500字以內，目前輸入 0 字      ', '')
+    #     if '【相關閱讀】' in content:
+    #         content = content.split('【相關閱讀】')[0]
+    #     return content
     
-    def parse_author(self, soup):
-        # author_info = soup.find('div', class_ = 'story_bady_info_author')
-        # for span in author_info.find_all('span'):
-        #     span.clear()
-        # author = author_info.text
+    # def parse_author(self, soup):
+    #     # author_info = soup.find('div', class_ = 'story_bady_info_author')
+    #     # for span in author_info.find_all('span'):
+    #     #     span.clear()
+    #     # author = author_info.text
         
-        date_org = soup.find('div', class_ = 'story_bady_info_author').find('span').text
-        content = ''.join([ent.text for ent in soup.find_all('p')]).replace('\n', '').replace('      500字以內，目前輸入 0 字      ', '')
-        try:
-            author = soup.find('div', class_ = 'story_bady_info_author').find('a').text
-        except AttributeError:
-            author = soup.find('div', class_ = 'story_bady_info_author').text.replace(date_org,'')   
-            author = [i  for i in author.split(' ') if '報' not in i if '新聞' not in i if '運動' not in i]
-            if len(author) > 0 :
-                author = ' '.join(author)
-            elif author == []:
-                author = ''
-            else:
-                author = author[0]                       
+    #     date_org = soup.find('div', class_ = 'story_bady_info_author').find('span').text
+    #     content = ''.join([ent.text for ent in soup.find_all('p')]).replace('\n', '').replace('      500字以內，目前輸入 0 字      ', '')
+    #     try:
+    #         author = soup.find('div', class_ = 'story_bady_info_author').find('a').text
+    #     except AttributeError:
+    #         author = soup.find('div', class_ = 'story_bady_info_author').text.replace(date_org,'')   
+    #         author = [i  for i in author.split(' ') if '報' not in i if '新聞' not in i if '運動' not in i]
+    #         if len(author) > 0 :
+    #             author = ' '.join(author)
+    #         elif author == []:
+    #             author = ''
+    #         else:
+    #             author = author[0]                       
         
-        reg = re.compile(r'【 \D+[／：/:]\D*】', re.VERBOSE)
-        tmp = reg.findall(content[:51])        
-        if tmp != []:
-            author = tmp[0]
-        return author    
+    #     reg = re.compile(r'【 \D+[／：/:]\D*】', re.VERBOSE)
+    #     tmp = reg.findall(content[:51])        
+    #     if tmp != []:
+    #         author = tmp[0]
+    #     return author    
     
-    def parse_metadata(self, soup, fb_like_count_html=None):
-        metadata = {'tag':[], 'category':'','fb_like_count':''}
-        try: 
-            metadata['tag'] = soup.find('div', id = 'story_tags').text.split('﹒')    
-        except AttributeError:
-            pass  
-        #metadata['fb_like_count'] = fb_like_count_html.find('span',{'id':'u_0_3'}).text
-        metadata['category'] = soup.find('div',{'id':'nav','class':'only_web'}).find_all('a')[-1].text
-        return metadata
+    # def parse_metadata(self, soup, fb_like_count_html=None):
+    #     metadata = {'tag':[], 'category':'','fb_like_count':''}
+    #     try: 
+    #         metadata['tag'] = soup.find('div', id = 'story_tags').text.split('﹒')    
+    #     except AttributeError:
+    #         pass  
+    #     #metadata['fb_like_count'] = fb_like_count_html.find('span',{'id':'u_0_3'}).text
+    #     metadata['category'] = soup.find('div',{'id':'nav','class':'only_web'}).find_all('a')[-1].text
+    #     return metadata

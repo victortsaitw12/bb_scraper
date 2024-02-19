@@ -2,20 +2,16 @@
 import scrapy
 import traceback, sys
 from dateutil.parser import parse as date_parser
-from scraper.items import NewsItem
-from .redis_spiders import RedisSpider
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 import json
 import re
 
-class PopdailySpider(RedisSpider):
+class PopdailySpider(scrapy.Spider):
 #class PopdailySpider(scrapy.Spider):
     name = "popdaily"
 
     def start_requests(self):
-        if isinstance(self, RedisSpider):
-            return
         requests = [{
             "media": "popdaily",
             "name": "popdaily",
@@ -112,45 +108,45 @@ class PopdailySpider(RedisSpider):
         soup = BeautifulSoup(response.body, 'lxml')
         js = soup.findAll('script', type='application/ld+json')[-1]
         js = json.loads(js.text)
-        item = NewsItem()
-        item['url'] = response.url
-        item['author'] = self.parse_author(js)
-        item['article_title'] = self.parse_title(js)
-        item['author_url'] = self.parse_author_url(response.text)
-        item['content'] = self.parse_content(js)
-        item['comment'] = []
-        item['date'] = self.parse_datetime(js)
-        item['metadata'] = self.parse_metadata(js,response.url)
-        item['metadata']['like_count'] = meta['like']
-        item['content_type'] = 0
-        item['media'] = 'popdaily'
-        item['proto'] = 'POPDAILY_PARSE_ITEM'
-        return item
+    #     item = NewsItem()
+    #     item['url'] = response.url
+    #     item['author'] = self.parse_author(js)
+    #     item['article_title'] = self.parse_title(js)
+    #     item['author_url'] = self.parse_author_url(response.text)
+    #     item['content'] = self.parse_content(js)
+    #     item['comment'] = []
+    #     item['date'] = self.parse_datetime(js)
+    #     item['metadata'] = self.parse_metadata(js,response.url)
+    #     item['metadata']['like_count'] = meta['like']
+    #     item['content_type'] = 0
+    #     item['media'] = 'popdaily'
+    #     item['proto'] = 'POPDAILY_PARSE_ITEM'
+    #     return item
 
-    def parse_datetime(self, js):
-        timestamp = js['datePublished'].split('.')[0]
-        date = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S')
-        date = date + timedelta(hours = 8)
-        return date.strftime('%Y-%m-%dT%H:%M:%S+0800')
+    # def parse_datetime(self, js):
+    #     timestamp = js['datePublished'].split('.')[0]
+    #     date = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S')
+    #     date = date + timedelta(hours = 8)
+    #     return date.strftime('%Y-%m-%dT%H:%M:%S+0800')
 
-    def parse_metadata(self, js, url):
-        metadata = {
-            'tag':js['keywords'],
-            'category':url.split('/')[-2]
-        }
-        return metadata
+    # def parse_metadata(self, js, url):
+    #     metadata = {
+    #         'tag':js['keywords'],
+    #         'category':url.split('/')[-2]
+    #     }
+    #     return metadata
 
-    def parse_author_url(self,html):
-        prefix = 'https://www.popdaily.com.tw/user/'
-        ind = html.find('%22%2C%22name')
-        return [prefix + html[(ind-6):ind]]
+    # def parse_author_url(self,html):
+    #     prefix = 'https://www.popdaily.com.tw/user/'
+    #     ind = html.find('%22%2C%22name')
+    #     return [prefix + html[(ind-6):ind]]
     
-    def parse_author(self,js):
-        return ','.join(js['author']) 
+    # def parse_author(self,js):
+    #     return ','.join(js['author']) 
         
-    def parse_title(self,js):
-        return js['headline'].split('｜')[0]
+    # def parse_title(self,js):
+    #     return js['headline'].split('｜')[0]
 
-    def parse_content(self,js):
-        return js['articleBody']
+    # def parse_content(self,js):
+    #     return js['articleBody']
     

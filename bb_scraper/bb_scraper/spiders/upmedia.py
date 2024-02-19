@@ -2,21 +2,17 @@
 import scrapy
 import traceback, sys
 from dateutil.parser import parse as date_parser
-from scraper.items import NewsItem
-from .redis_spiders import RedisSpider
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 import requests
 import json
 import re
 
-class UpmediaSpider(RedisSpider):
+class UpmediaSpider(scrapy.Spider):
 #class UpmediaSpider(scrapy.Spider):
     name = "upmedia"
 
     def start_requests(self):
-        if isinstance(self, RedisSpider):
-            return
         requests = [{
             "media": "upmedia",
             "name": "upmedia",
@@ -111,62 +107,62 @@ class UpmediaSpider(RedisSpider):
             new_location = re.search(r'location.href=\'(.*?)\';',location.text.strip()).group(1)
             return scrapy.Request(new_location, callback=self.parse_article)
             
-        item = NewsItem()
-        item['url'] = response.url
-        item['author'] = self.parse_author(soup)
-        item['article_title'] = self.parse_title(soup)
-        item['author_url'] = []
-        item['content'] = self.parse_content(soup)
-        item['comment'] = []
-        item['date'] = self.parse_datetime(soup)
-        item['metadata'] = self.parse_metadata(soup)
-        item['content_type'] = 0
-        item['media'] = 'upmedia'
-        item['proto'] =  'UPMEDIA_PARSE_ITEM'
-        return item
+    #     item = NewsItem()
+    #     item['url'] = response.url
+    #     item['author'] = self.parse_author(soup)
+    #     item['article_title'] = self.parse_title(soup)
+    #     item['author_url'] = []
+    #     item['content'] = self.parse_content(soup)
+    #     item['comment'] = []
+    #     item['date'] = self.parse_datetime(soup)
+    #     item['metadata'] = self.parse_metadata(soup)
+    #     item['content_type'] = 0
+    #     item['media'] = 'upmedia'
+    #     item['proto'] =  'UPMEDIA_PARSE_ITEM'
+    #     return item
 
-    def parse_title(self, soup):
-        title = soup.find('title').text
-        title = ' '.join(title.split())
-        title = title.split('--')[0]
-        return title
+    # def parse_title(self, soup):
+    #     title = soup.find('title').text
+    #     title = ' '.join(title.split())
+    #     title = title.split('--')[0]
+    #     return title
     
-    def parse_datetime(self, soup):     
-        date = soup.find('head').find('meta',{'name':"pubdate"})['content']
-        date = datetime.strptime( date , '%Y-%m-%dT%H:%M:%S')
-        date = date.strftime('%Y-%m-%dT%H:%M:%S+0800')
-        return date
+    # def parse_datetime(self, soup):     
+    #     date = soup.find('head').find('meta',{'name':"pubdate"})['content']
+    #     date = datetime.strptime( date , '%Y-%m-%dT%H:%M:%S')
+    #     date = date.strftime('%Y-%m-%dT%H:%M:%S+0800')
+    #     return date
     
-    def parse_author(self, soup):
-        try:
-            author = soup.find('div','author').find_all('a')
-            author = ','.join(x.text for x in author)
-            if author.find('／') != -1:
-                author = re.split('／', author)[1]
-        except:
-            author = ''
-        return author
+    # def parse_author(self, soup):
+    #     try:
+    #         author = soup.find('div','author').find_all('a')
+    #         author = ','.join(x.text for x in author)
+    #         if author.find('／') != -1:
+    #             author = re.split('／', author)[1]
+    #     except:
+    #         author = ''
+    #     return author
     
-    def parse_content(self, soup):
-        content = soup.find('div','editor')
-        for rss_close in content.find_all('div','rss_close'):
-            rss_close.decompose()
-        for ad in content.find_all('a'):
-            ad.decompose()
-        for ad in content.find_all('div',{'id':'divider_ad'}):
-            ad.decompose()
-        for script in content.find_all('script'):
-            script.decompose() 
-        content = '\n'.join(content.text.split())
-        content = content.replace('（）','')
-        return content
+    # def parse_content(self, soup):
+    #     content = soup.find('div','editor')
+    #     for rss_close in content.find_all('div','rss_close'):
+    #         rss_close.decompose()
+    #     for ad in content.find_all('a'):
+    #         ad.decompose()
+    #     for ad in content.find_all('div',{'id':'divider_ad'}):
+    #         ad.decompose()
+    #     for script in content.find_all('script'):
+    #         script.decompose() 
+    #     content = '\n'.join(content.text.split())
+    #     content = content.replace('（）','')
+    #     return content
     
-    def parse_metadata(self, soup):
-        keywords = soup.find('head').find('meta',{'name':'keywords'})['content']
-        keywords = re.split(',', keywords)
-        category = soup.find('meta',{'itemprop':'articleSection'})['content']
-        return {
-            'tag':keywords,
-            'category':category,
-            'fb_like_count':''
-        }
+    # def parse_metadata(self, soup):
+    #     keywords = soup.find('head').find('meta',{'name':'keywords'})['content']
+    #     keywords = re.split(',', keywords)
+    #     category = soup.find('meta',{'itemprop':'articleSection'})['content']
+    #     return {
+    #         'tag':keywords,
+    #         'category':category,
+    #         'fb_like_count':''
+    #     }

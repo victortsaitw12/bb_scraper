@@ -2,19 +2,16 @@
 import scrapy
 import traceback, sys
 from dateutil.parser import parse as date_parser
-from scraper.items import NewsItem
-from .redis_spiders import RedisSpider
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 import json
 import re
 
-class ChinatimesSpider(RedisSpider):
+class ChinatimesSpider(scrapy.Spider):
     name = "chinatimes"
 
     def start_requests(self):
-        if isinstance(self, RedisSpider):
-            return
+  
         requests = [{
             "media": "chinatimes",
             "name": "chinatimes",
@@ -62,44 +59,44 @@ class ChinatimesSpider(RedisSpider):
 
     def parse_article(self, response):
         soup = BeautifulSoup(response.body, 'html.parser')
-        item = NewsItem()
-        item['url'] = response.url
-        item['author'] = self.parse_author(soup)
-        item['article_title'] = self.parse_title(soup)
-        item['author_url'] = []
-        item['content'] = self.parse_content(soup)
-        item['comment'] = []
-        item['date'] = self.parse_datetime(soup)
-        item['metadata'] = self.parse_metadata(soup)
-        item['content_type'] = 0
-        item['media'] = 'chinatimes'
-        item['proto'] = 'CHINATIMES_PARSE_ITEM'
-        return item
+    #     item = NewsItem()
+    #     item['url'] = response.url
+    #     item['author'] = self.parse_author(soup)
+    #     item['article_title'] = self.parse_title(soup)
+    #     item['author_url'] = []
+    #     item['content'] = self.parse_content(soup)
+    #     item['comment'] = []
+    #     item['date'] = self.parse_datetime(soup)
+    #     item['metadata'] = self.parse_metadata(soup)
+    #     item['content_type'] = 0
+    #     item['media'] = 'chinatimes'
+    #     item['proto'] = 'CHINATIMES_PARSE_ITEM'
+    #     return item
 
-    def parse_datetime(self, soup):
-        date = soup.find('div','meta-info').find('time')['datetime']
-        date = datetime.strptime( date , '%Y-%m-%d %H:%M')
-        date = date.strftime('%Y-%m-%dT%H:%M:%S+0800')
-        return date
+    # def parse_datetime(self, soup):
+    #     date = soup.find('div','meta-info').find('time')['datetime']
+    #     date = datetime.strptime( date , '%Y-%m-%d %H:%M')
+    #     date = date.strftime('%Y-%m-%dT%H:%M:%S+0800')
+    #     return date
     
-    def parse_author(self, soup):
-        author = re.findall('\S',soup.find('div','author').text)
-        author = ''.join([x for x in author ]) 
-        return author
+    # def parse_author(self, soup):
+    #     author = re.findall('\S',soup.find('div','author').text)
+    #     author = ''.join([x for x in author ]) 
+    #     return author
     
-    def parse_title(self, soup):
-        title = soup.find('h1','article-title').text
-        title = ' '.join(title.split())
-        return title
+    # def parse_title(self, soup):
+    #     title = soup.find('h1','article-title').text
+    #     title = ' '.join(title.split())
+    #     return title
     
-    def parse_content(self, soup):
-        content = soup.find('head').find('meta',{'name':'description'})['content']
-        return content
+    # def parse_content(self, soup):
+    #     content = soup.find('head').find('meta',{'name':'description'})['content']
+    #     return content
 
-    def parse_metadata(self, soup):
-        keywords = soup.find('div','article-hash-tag').find_all('span','hash-tag')
-        keywords = [x.text.replace('#','') for x in keywords]
-        category = soup.find('meta',{'property':'article:section'})['content']
-        metadata = {'tag': keywords, 'category':category}
-        return metadata
+    # def parse_metadata(self, soup):
+    #     keywords = soup.find('div','article-hash-tag').find_all('span','hash-tag')
+    #     keywords = [x.text.replace('#','') for x in keywords]
+    #     category = soup.find('meta',{'property':'article:section'})['content']
+    #     metadata = {'tag': keywords, 'category':category}
+    #     return metadata
     
